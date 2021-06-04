@@ -49,7 +49,7 @@ loadData().then(data => {
 
     colorScale.domain(d3.set(data.map(d=>d.region)).values());
 
-    d3.select('#range').on('change', function(){ 
+    d3.select('#range').on('input', function(){ 
         year = d3.select(this).property('value');
         yearLable.html(year);
         updateScattePlot();
@@ -96,7 +96,7 @@ loadData().then(data => {
     
         scatterPlot.selectAll('circle').remove();
 
-        scatterPlot.append('g').selectAll('circle')
+        scatterPlot.selectAll('circle')
             .data(data)
             .enter()
             .append('circle')
