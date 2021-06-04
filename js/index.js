@@ -77,10 +77,36 @@ loadData().then(data => {
     });
 
     function updateBar(){
+        
         return;
     }
 
     function updateScattePlot(){
+
+        let xValues = data.map(d=> Number(d[xParam][year]));
+        x.domain([d3.min(xValues), d3.max(xValues)]);
+        xAxis.call(d3.axisBottom(x));
+
+        let yValues = data.map(d => Number(d[yParam][year]));
+        y.domain([d3.min(yValues), d3.max(yValues)]);
+        yAxis.call(d3.axisLeft(y));
+
+        let rValues = data.map(d => Number(d[rParam][year]));
+        radiusScale.domain([d3.min(rValues), d3.max(rValues)]);
+    
+        scatterPlot.selectAll('circle').remove();
+
+        scatterPlot.append('g').selectAll('circle')
+            .data(data)
+            .enter()
+            .append('circle')
+                .attr('cx', d => x(d[xParam][year]))
+                .attr('cy', d => y(d[yParam][year]))
+                .attr('r', d => radiusScale(d[rParam][year]))
+                .attr("fill", d => colorScale(d['region']))
+
+       // scatterPlot.selectAll('dot').data(data).exit().remove();
+
         return;
     }
 
@@ -112,3 +138,4 @@ async function loadData() {
         }
     })
 }
+
