@@ -80,6 +80,11 @@ loadData().then(data => {
         updateScattePlot();
     });
 
+    d3.select('#p').on('change', function(){ 
+        lineParam = d3.select(this).property('value');
+        updateLineChart();
+    });
+
     function updateBar(){
         let regions = d3.set(data.map(d=>d.region)).values();
 
@@ -144,12 +149,58 @@ loadData().then(data => {
             .enter()
             .append('circle')
                 .attr("region", d => d.region)
+                .attr('country', d => d.country)
                 .attr('cx', d => x(d[xParam][year]))
                 .attr('cy', d => y(d[yParam][year]))
                 .attr('r', d => radiusScale(d[rParam][year]))
                 .attr("fill", d => colorScale(d['region']))
+                .on('click', function(d) {
+                    scatterPlot.selectAll('circle')
+                        .style('opacity', 0.7)
+                        .attr('stroke-width', 1)
+                    d3.select(this)
+                        .style('opacity', 1)
+                        .attr('stroke-width', 2)
+                    d3.select(this).raise();
+                    selected = d3.select(this).attr('country');
+                    updateBar();
+                    updateLineChart();
+                })
 
         return;
+    }
+
+    function updateLineChart(){
+        console.log(selected)
+        if (selected != '') {
+            d3.select('.country-name').text(selected);
+            
+            chartData = Object.entries(
+                data.filter(d => d.country == selected)[0][lineParam]
+                ).slice(0, 221)
+            dates = chartData.map(d => +d[0])
+            charValues = chartData.map(d => +d[1])
+    
+
+            x.domain([d3.min(dates), d3.max(dates)]);
+            xLineAxis.call(d3.axisBottom(x));
+
+            y.domain([d3.min(charValues), d3.max(charValues)]);
+            yLineAxis.call(d3.axisLeft(y));
+
+            lineChart.select('.lineData').remove();
+
+            lineChart.append("path")
+                .datum(chartData)
+                .attr("class", "lineData")
+                .attr("fill", "none")
+                .attr("stroke", "steelblue")
+                .attr("stroke-width", 1.5)
+                .attr("d", d3.line()
+                    .x(d => {console.log(d); return x(+d[0])})
+                    .y(d => y(+d[1]))
+                    )
+        }
     }
 
     updateBar();
