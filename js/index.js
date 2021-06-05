@@ -77,6 +77,34 @@ loadData().then(data => {
     });
 
     function updateBar(){
+        let regions = d3.set(data.map(d=>d.region)).values();
+
+        let mean_for_regions = regions.map(region => {
+            return {
+            'region': region,
+            'mean': d3.mean(data.filter(d => d.region == region).flatMap(d => d[param][year]))
+            }
+        });
+
+        xBar.domain(regions);
+        xBarAxis.call(d3.axisBottom(xBar));
+    
+        yBar.domain([0, d3.max(mean_for_regions.map(d => d.mean))])
+        yBarAxis.call(d3.axisLeft(yBar));
+
+        console.log("sometext")
+
+        barChart.selectAll('rect').remove();
+
+        barChart.selectAll('rect')
+            .data(mean_for_regions)
+            .enter()
+            .append('rect')
+                .attr('x', d => xBar(d.region))
+                .attr('y', d => yBar(d.mean))
+                .attr("width", xBar.bandwidth())
+                .attr("height", d => height - margin - yBar(d.mean))
+                .attr("fill", d => colorScale(d.region))
         
         return;
     }
@@ -104,8 +132,6 @@ loadData().then(data => {
                 .attr('cy', d => y(d[yParam][year]))
                 .attr('r', d => radiusScale(d[rParam][year]))
                 .attr("fill", d => colorScale(d['region']))
-
-       // scatterPlot.selectAll('dot').data(data).exit().remove();
 
         return;
     }
